@@ -12,12 +12,11 @@ spec:
       node.ingest: true
     volumeClaimTemplates:
     - metadata:
-        name: elasticsearch-data
+        name: elastic-data
       spec:
         accessModes:
         - ReadWriteOnce
         resources:
           requests:
-            storage: 1Ti
+            storage: 100Gi
         storageClassName: pure-file
-        
