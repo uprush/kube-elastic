@@ -1,11 +1,12 @@
-apiVersion: elasticsearch.k8s.elastic.co/v1beta1
+apiVersion: elasticsearch.k8s.elastic.co/v1
 kind: Elasticsearch
 metadata:
   name: reddot
 spec:
   version: 7.6.0
   nodeSets:
-  - count: 3
+  - name: default
+    count: 3
     config:
       node.master: true
       node.data: true
@@ -20,3 +21,16 @@ spec:
           requests:
             storage: 100Gi
         storageClassName: pure-file
+
+
+---
+
+apiVersion: kibana.k8s.elastic.co/v1
+kind: Kibana
+metadata:
+  name: reddot
+spec:
+  version: 7.6.0
+  count: 1
+  elasticsearchRef:
+    name: reddot
