@@ -1,7 +1,7 @@
 apiVersion: elasticsearch.k8s.elastic.co/v1
 kind: Elasticsearch
 metadata:
-  name: reddot-es
+  name: reddot
 spec:
   version: 7.8.1
   nodeSets:
@@ -28,9 +28,9 @@ spec:
 apiVersion: kibana.k8s.elastic.co/v1
 kind: Kibana
 metadata:
-  name: reddot-kb
+  name: reddot
 spec:
   version: 7.8.1
   count: 1
   elasticsearchRef:
-    name: reddot-es
+    name: reddot
