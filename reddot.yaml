@@ -61,3 +61,23 @@ spec:
           limits:
             memory: 2Gi
             cpu: 2
+
+
+---
+
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: kibana
+  namespace: elastic
+  annotations:
+    haproxy.org/ssl-passthrough: "true"
+spec:
+  rules:
+  - host: kibana.purestorage.int
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: reddot-kb-http
+          servicePort: 5601
