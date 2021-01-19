@@ -52,6 +52,10 @@ Create a snapshot policy on [Stack Management UI](https://kibana.purestorage.int
 # Demo
 Demo flow:
 1. k8s cluster walk through, PSO storage class
-2. k8s logging with Elastic & FB: search, dashboard
+2. k8s logging with Elastic & FB: search 'error', dashboard
 3. Scale Elastic: data node count, pure-file, FB UI
-4. Snapshot to S3
+4. Snapshot to S3: repo setting, s3 ls
+
+```
+s3 ls s3://deephub/elastic/snapshots/
+```
