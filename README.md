@@ -48,3 +48,10 @@ Check repositories on [Repositories UI](https://kibana.purestorage.int:16444/app
 ## Create snapshots
 Create a snapshot policy on [Stack Management UI](https://kibana.purestorage.int:16444/app/kibana#/management/elasticsearch/snapshot_restore/policies).
 
+
+# Demo
+Demo flow:
+1. k8s cluster walk through, PSO storage class
+2. k8s logging with Elastic & FB: search, dashboard
+3. Scale Elastic: data node count, pure-file, FB UI
+4. Snapshot to S3
