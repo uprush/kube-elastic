@@ -5,7 +5,12 @@ Code snippets and notes on running Apache Spark with Kubernetes.
 
 Install Elastic Cloud on Kubbernetes Operator
 ```
-kubectl apply -f https://download.elastic.co/downloads/eck/1.0.1/all-in-one.yaml
+kubectl apply -f https://download.elastic.co/downloads/eck/1.5.0/all-in-one.yaml
+```
+
+Create a Elastic cluster:
+```
+kubectl apply -f reddot.yaml
 ```
 
 # Snapshot to S3
