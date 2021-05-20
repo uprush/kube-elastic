@@ -4,7 +4,7 @@ metadata:
   name: reddot
   namespace: elastic
 spec:
-  version: 7.12.1
+  version: 7.10.2
   nodeSets:
   - name: master
     count: 3
@@ -55,10 +55,10 @@ spec:
         - name: elasticsearch
           env:
           - name: ES_JAVA_OPTS
-            value: -Xms4g -Xmx4g
+            value: -Xms6g -Xmx6g
           resources:
             requests:
-              memory: 6Gi
+              memory: 8Gi
               cpu: 1
   - name: data
     count: 2
@@ -109,10 +109,10 @@ spec:
         - name: elasticsearch
           env:
           - name: ES_JAVA_OPTS
-            value: -Xms4g -Xmx4g
+            value: -Xms6g -Xmx6g
           resources:
             requests:
-              memory: 6Gi
+              memory: 8Gi
               cpu: 1
 
 ---
@@ -123,7 +123,7 @@ metadata:
   name: reddot
   namespace: elastic
 spec:
-  version: 7.12.1
+  version: 7.10.2
   count: 1
   elasticsearchRef:
     name: reddot
@@ -133,7 +133,7 @@ spec:
       - name: kibana
         resources:
           requests:
-            memory: 2Gi
+            memory: 4Gi
             cpu: 1
 
 
