@@ -13,6 +13,13 @@ Create a Elastic cluster:
 kubectl apply -f reddot.yaml
 ```
 
+Browser to Kibana UI at [kibana.purestorage.int]()
+
+Get elastic user password.
+```
+kubectl -n elastic get secret reddot-es-elastic-user -o=jsonpath='{.data.elastic}' | base64 --decode; echo
+```
+
 # Snapshot to S3
 Reference:
 * [A Guide to Elasticsearch Snapshots](https://joshua-robinson.medium.com/a-guide-to-elasticsearch-snapshots-565017630638)

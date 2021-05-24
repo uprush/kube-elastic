@@ -4,14 +4,14 @@ metadata:
   name: reddot
   namespace: elastic
 spec:
-  version: 7.10.2
+  version: 7.12.1
   nodeSets:
   - name: master
-    count: 3
+    count: 1
     config:
       node.master: true
-      node.data: true
-      node.ingest: true
+      node.data: false
+      node.ingest: false
       thread_pool.snapshot.max: 4
     volumeClaimTemplates:
     - metadata:
@@ -61,7 +61,7 @@ spec:
               memory: 8Gi
               cpu: 1
   - name: data
-    count: 2
+    count: 3
     config:
       node.master: false
       node.data: true
@@ -123,7 +123,7 @@ metadata:
   name: reddot
   namespace: elastic
 spec:
-  version: 7.10.2
+  version: 7.12.1
   count: 1
   elasticsearchRef:
     name: reddot
