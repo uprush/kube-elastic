@@ -9,9 +9,7 @@ spec:
   - name: master
     count: 1
     config:
-      node.master: true
-      node.data: false
-      node.ingest: false
+      node.roles: ["master"]
       thread_pool.snapshot.max: 4
     volumeClaimTemplates:
     - metadata:
@@ -63,10 +61,9 @@ spec:
   - name: data
     count: 3
     config:
-      node.master: false
-      node.data: true
-      node.ingest: true
+      node.roles: ["data_hot", "data_warm", "ingest", "data_cold", "data_content"]
       thread_pool.snapshot.max: 4
+      xpack.searchable.snapshot.shared_cache.size: 10gb
     volumeClaimTemplates:
     - metadata:
         name: elasticsearch-data
@@ -113,6 +110,59 @@ spec:
           resources:
             requests:
               memory: 8Gi
+              cpu: 1
+  - name: data-frozen
+    count: 2
+    config:
+      node.roles: ["data_frozen"]
+      thread_pool.snapshot.max: 4
+      xpack.searchable.snapshot.shared_cache.size: 90gb
+    volumeClaimTemplates:
+    - metadata:
+        name: elasticsearch-data
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 100Gi
+        storageClassName: pure-file
+    podTemplate:
+      spec:
+        initContainers:
+          - name: install-plugins
+            command:
+              - sh
+              - -c
+              - |
+                bin/elasticsearch-plugin remove --batch repository-s3
+                bin/elasticsearch-plugin install --batch repository-s3
+          - name: add-access-keys
+            env:
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: es-s3-keys
+                  key: access-key
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: es-s3-keys
+                  key: secret-key
+            command:
+              - sh
+              - -c
+              - |
+                echo $AWS_ACCESS_KEY_ID | bin/elasticsearch-keystore add --stdin --force s3.client.default.access_key
+                echo $AWS_SECRET_ACCESS_KEY | bin/elasticsearch-keystore add --stdin --force s3.client.default.secret_key
+        containers:
+        - name: elasticsearch
+          env:
+          - name: ES_JAVA_OPTS
+            value: -Xms3g -Xmx3g
+          resources:
+            requests:
+              memory: 4Gi
               cpu: 1
 
 ---

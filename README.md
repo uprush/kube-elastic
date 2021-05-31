@@ -23,6 +23,8 @@ kubectl -n elastic get secret reddot-es-elastic-user -o=jsonpath='{.data.elastic
 # Snapshot to S3
 Reference:
 * [A Guide to Elasticsearch Snapshots](https://joshua-robinson.medium.com/a-guide-to-elasticsearch-snapshots-565017630638)
+* [Elastic Data Tiers](https://www.elastic.co/guide/en/elasticsearch/reference/master/data-tiers.html)
+* [Searchable snapshots demo](./searchable-snapshots.md)
 
 ## Install S3 snapshot repository
 
@@ -59,7 +61,6 @@ Check repositories on [Repositories UI](https://kibana.purestorage.int:16444/app
 
 ## Create snapshots
 Create a snapshot policy on [Stack Management UI](https://kibana.purestorage.int:16444/app/kibana#/management/elasticsearch/snapshot_restore/policies).
-
 
 # Demo
 Demo flow:
