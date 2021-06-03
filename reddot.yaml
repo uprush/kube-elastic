@@ -5,6 +5,10 @@ metadata:
   namespace: elastic
 spec:
   version: 7.12.1
+  http:
+    tls:
+      selfSignedCertificate:
+        disabled: true
   nodeSets:
   - name: master
     count: 1
@@ -174,6 +178,10 @@ metadata:
   namespace: elastic
 spec:
   version: 7.12.1
+  http:
+    tls:
+      selfSignedCertificate:
+        disabled: true
   count: 1
   elasticsearchRef:
     name: reddot
@@ -194,8 +202,8 @@ kind: Ingress
 metadata:
   name: kibana
   namespace: elastic
-  annotations:
-    haproxy.org/ssl-passthrough: "true"
+  # annotations:
+  #   haproxy.org/ssl-passthrough: "true"
 spec:
   rules:
   - host: kibana.purestorage.int
