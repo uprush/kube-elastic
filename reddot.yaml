@@ -4,7 +4,7 @@ metadata:
   name: reddot
   namespace: elastic
 spec:
-  version: 7.12.1
+  version: 7.15.0
   http:
     tls:
       selfSignedCertificate:
@@ -116,7 +116,7 @@ spec:
               memory: 8Gi
               cpu: 1
   - name: data-frozen
-    count: 2
+    count: 1
     config:
       node.roles: ["data_frozen"]
       thread_pool.snapshot.max: 4
@@ -177,7 +177,7 @@ metadata:
   name: reddot
   namespace: elastic
 spec:
-  version: 7.12.1
+  version: 7.15.0
   http:
     tls:
       selfSignedCertificate:
