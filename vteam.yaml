@@ -1,0 +1,62 @@
+apiVersion: elasticsearch.k8s.elastic.co/v1
+kind: Elasticsearch
+metadata:
+  name: yf-elastic
+spec:
+  version: 7.15.0
+  http:
+    tls:
+      selfSignedCertificate:
+        disabled: true
+  nodeSets:
+  - name: master
+    count: 1
+    config:
+    volumeClaimTemplates:
+    - metadata:
+        name: elasticsearch-data
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 200Gi
+        storageClassName: px-file
+    podTemplate:
+      spec:
+        securityContext:
+          fsGroup: 1000
+          runAsUser: 1000
+        containers:
+        - name: elasticsearch
+          env:
+          - name: ES_JAVA_OPTS
+            value: -Xms6g -Xmx6g
+          resources:
+            requests:
+              memory: 8Gi
+              cpu: 1
+
+---
+
+apiVersion: kibana.k8s.elastic.co/v1
+kind: Kibana
+metadata:
+  name: yf-elastic
+spec:
+  version: 7.15.0
+  http:
+    tls:
+      selfSignedCertificate:
+        disabled: true
+  count: 1
+  elasticsearchRef:
+    name: yf-elastic
+  podTemplate:
+    spec:
+      containers:
+      - name: kibana
+        resources:
+          requests:
+            memory: 4Gi
+            cpu: 1

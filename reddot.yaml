@@ -5,6 +5,7 @@ metadata:
   namespace: elastic
 spec:
   version: 7.15.0
+  image: harbor.purestorage.int/reddot/elasticsearch:7.15.1
   http:
     tls:
       selfSignedCertificate:
@@ -24,17 +25,15 @@ spec:
         resources:
           requests:
             storage: 200Gi
-        storageClassName: pure-file
+        storageClassName: px-file
     podTemplate:
       spec:
+        securityContext:
+          fsGroup: 1000
+          runAsUser: 1000
+        imagePullSecrets:
+          - name: regcred
         initContainers:
-          - name: install-plugins
-            command:
-              - sh
-              - -c
-              - |
-                bin/elasticsearch-plugin remove --batch repository-s3
-                bin/elasticsearch-plugin install --batch repository-s3
           - name: add-access-keys
             env:
             - name: AWS_ACCESS_KEY_ID
@@ -77,17 +76,15 @@ spec:
         resources:
           requests:
             storage: 200Gi
-        storageClassName: pure-file
+        storageClassName: px-file
     podTemplate:
       spec:
+        securityContext:
+          fsGroup: 1000
+          runAsUser: 1000
+        imagePullSecrets:
+          - name: regcred
         initContainers:
-          - name: install-plugins
-            command:
-              - sh
-              - -c
-              - |
-                bin/elasticsearch-plugin remove --batch repository-s3
-                bin/elasticsearch-plugin install --batch repository-s3
           - name: add-access-keys
             env:
             - name: AWS_ACCESS_KEY_ID
@@ -130,17 +127,15 @@ spec:
         resources:
           requests:
             storage: 100Gi
-        storageClassName: pure-file
+        storageClassName: px-file
     podTemplate:
       spec:
+        securityContext:
+          fsGroup: 1000
+          runAsUser: 1000
+        imagePullSecrets:
+          - name: regcred
         initContainers:
-          - name: install-plugins
-            command:
-              - sh
-              - -c
-              - |
-                bin/elasticsearch-plugin remove --batch repository-s3
-                bin/elasticsearch-plugin install --batch repository-s3
           - name: add-access-keys
             env:
             - name: AWS_ACCESS_KEY_ID
