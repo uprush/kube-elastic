@@ -3,6 +3,7 @@ ElasticSearch with Kubernetes
 
 Code snippets and notes on running Apache Spark with Kubernetes.
 
+# Installation
 Install Elastic Cloud on Kubbernetes Operator
 ```
 kubectl create -f crds.yaml
@@ -26,6 +27,12 @@ Get elastic user password.
 ```
 kubectl -n elastic get secret reddot-es-elastic-user -o=jsonpath='{.data.elastic}' | base64 --decode; echo
 ```
+
+## Visualize k8s logs using ES
+Create index partern: `k8s-logs` and `k8s-systemd`. Go to Kibana - Stack Management - Index Patterns
+
+Import k8s-logs dashboard using `export.ndjson`. Go to Kibana - Stack Management - Saved objects.
+
 
 # Snapshot to S3
 Reference:
