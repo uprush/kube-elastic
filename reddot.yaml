@@ -2,7 +2,7 @@ apiVersion: elasticsearch.k8s.elastic.co/v1
 kind: Elasticsearch
 metadata:
   name: reddot
-  namespace: elastic
+  namespace: bds
 spec:
   version: 7.15.0
   image: harbor.purestorage.int/reddot/elasticsearch:7.15.1
@@ -24,8 +24,8 @@ spec:
         - ReadWriteOnce
         resources:
           requests:
-            storage: 200Gi
-        storageClassName: px-file
+            storage: 100Gi
+        storageClassName: pure-block
     podTemplate:
       spec:
         securityContext:
@@ -39,12 +39,12 @@ spec:
             - name: AWS_ACCESS_KEY_ID
               valueFrom:
                 secretKeyRef:
-                  name: es-s3-keys
+                  name: bds-s3
                   key: access-key
             - name: AWS_SECRET_ACCESS_KEY
               valueFrom:
                 secretKeyRef:
-                  name: es-s3-keys
+                  name: bds-s3
                   key: secret-key
             command:
               - sh
@@ -62,7 +62,7 @@ spec:
               memory: 8Gi
               cpu: 1
   - name: data
-    count: 3
+    count: 5
     config:
       node.roles: ["data_hot", "data_warm", "ingest", "data_cold", "data_content"]
       thread_pool.snapshot.max: 4
@@ -75,8 +75,8 @@ spec:
         - ReadWriteOnce
         resources:
           requests:
-            storage: 200Gi
-        storageClassName: px-file
+            storage: 400Gi
+        storageClassName: pure-file
     podTemplate:
       spec:
         securityContext:
@@ -90,12 +90,12 @@ spec:
             - name: AWS_ACCESS_KEY_ID
               valueFrom:
                 secretKeyRef:
-                  name: es-s3-keys
+                  name: bds-s3
                   key: access-key
             - name: AWS_SECRET_ACCESS_KEY
               valueFrom:
                 secretKeyRef:
-                  name: es-s3-keys
+                  name: bds-s3
                   key: secret-key
             command:
               - sh
@@ -127,7 +127,7 @@ spec:
         resources:
           requests:
             storage: 100Gi
-        storageClassName: px-file
+        storageClassName: pure-file
     podTemplate:
       spec:
         securityContext:
@@ -141,12 +141,12 @@ spec:
             - name: AWS_ACCESS_KEY_ID
               valueFrom:
                 secretKeyRef:
-                  name: es-s3-keys
+                  name: bds-s3
                   key: access-key
             - name: AWS_SECRET_ACCESS_KEY
               valueFrom:
                 secretKeyRef:
-                  name: es-s3-keys
+                  name: bds-s3
                   key: secret-key
             command:
               - sh
@@ -162,7 +162,7 @@ spec:
           resources:
             requests:
               memory: 4Gi
-              cpu: 1
+              cpu: 500m
 
 ---
 
@@ -170,7 +170,7 @@ apiVersion: kibana.k8s.elastic.co/v1
 kind: Kibana
 metadata:
   name: reddot
-  namespace: elastic
+  namespace: bds
 spec:
   version: 7.15.0
   http:
@@ -196,9 +196,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: kibana
-  namespace: elastic
-  # annotations:
-  #   haproxy.org/ssl-passthrough: "true"
+  namespace: bds
 spec:
   rules:
   - host: kibana.purestorage.int

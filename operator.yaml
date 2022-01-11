@@ -2,16 +2,16 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: elastic-system
+  name: bds-system
   labels:
-    name: elastic-system
+    name: bds-system
 ---
 # Source: eck-operator/templates/service-account.yaml
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: elastic-operator
-  namespace: elastic-system
+  namespace: bds-system
   labels:
     control-plane: elastic-operator
     app.kubernetes.io/version: "1.8.0"
@@ -21,7 +21,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: elastic-webhook-server-cert
-  namespace: elastic-system
+  namespace: bds-system
   labels:
     control-plane: elastic-operator
     app.kubernetes.io/version: "1.8.0"
@@ -31,7 +31,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: elastic-operator
-  namespace: elastic-system
+  namespace: bds-system
   labels:
     control-plane: elastic-operator
     app.kubernetes.io/version: "1.8.0"
@@ -317,14 +317,14 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: elastic-operator
-    namespace: elastic-system
+    namespace: bds-system
 ---
 # Source: eck-operator/templates/webhook.yaml
 apiVersion: v1
 kind: Service
 metadata:
   name: elastic-webhook-server
-  namespace: elastic-system
+  namespace: bds-system
   labels:
     control-plane: elastic-operator
     app.kubernetes.io/version: "1.8.0"
@@ -341,7 +341,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: elastic-operator
-  namespace: elastic-system
+  namespace: bds-system
   labels:
     control-plane: elastic-operator
     app.kubernetes.io/version: "1.8.0"
@@ -424,7 +424,7 @@ webhooks:
       caBundle: Cg==
       service:
         name: elastic-webhook-server
-        namespace: elastic-system
+        namespace: bds-system
         path: /validate-agent-k8s-elastic-co-v1alpha1-agent
     failurePolicy: Ignore
     name: elastic-agent-validation-v1alpha1.k8s.elastic.co
@@ -445,7 +445,7 @@ webhooks:
       caBundle: Cg==
       service:
         name: elastic-webhook-server
-        namespace: elastic-system
+        namespace: bds-system
         path: /validate-apm-k8s-elastic-co-v1-apmserver
     failurePolicy: Ignore
     name: elastic-apm-validation-v1.k8s.elastic.co
@@ -466,7 +466,7 @@ webhooks:
       caBundle: Cg==
       service:
         name: elastic-webhook-server
-        namespace: elastic-system
+        namespace: bds-system
         path: /validate-apm-k8s-elastic-co-v1beta1-apmserver
     failurePolicy: Ignore
     name: elastic-apm-validation-v1beta1.k8s.elastic.co
@@ -487,7 +487,7 @@ webhooks:
       caBundle: Cg==
       service:
         name: elastic-webhook-server
-        namespace: elastic-system
+        namespace: bds-system
         path: /validate-beat-k8s-elastic-co-v1beta1-beat
     failurePolicy: Ignore
     name: elastic-beat-validation-v1beta1.k8s.elastic.co
@@ -508,7 +508,7 @@ webhooks:
       caBundle: Cg==
       service:
         name: elastic-webhook-server
-        namespace: elastic-system
+        namespace: bds-system
         path: /validate-enterprisesearch-k8s-elastic-co-v1-enterprisesearch
     failurePolicy: Ignore
     name: elastic-ent-validation-v1.k8s.elastic.co
@@ -529,7 +529,7 @@ webhooks:
       caBundle: Cg==
       service:
         name: elastic-webhook-server
-        namespace: elastic-system
+        namespace: bds-system
         path: /validate-enterprisesearch-k8s-elastic-co-v1beta1-enterprisesearch
     failurePolicy: Ignore
     name: elastic-ent-validation-v1beta1.k8s.elastic.co
@@ -550,7 +550,7 @@ webhooks:
       caBundle: Cg==
       service:
         name: elastic-webhook-server
-        namespace: elastic-system
+        namespace: bds-system
         path: /validate-elasticsearch-k8s-elastic-co-v1-elasticsearch
     failurePolicy: Ignore
     name: elastic-es-validation-v1.k8s.elastic.co
@@ -571,7 +571,7 @@ webhooks:
       caBundle: Cg==
       service:
         name: elastic-webhook-server
-        namespace: elastic-system
+        namespace: bds-system
         path: /validate-elasticsearch-k8s-elastic-co-v1beta1-elasticsearch
     failurePolicy: Ignore
     name: elastic-es-validation-v1beta1.k8s.elastic.co
@@ -592,7 +592,7 @@ webhooks:
       caBundle: Cg==
       service:
         name: elastic-webhook-server
-        namespace: elastic-system
+        namespace: bds-system
         path: /validate-kibana-k8s-elastic-co-v1-kibana
     failurePolicy: Ignore
     name: elastic-kb-validation-v1.k8s.elastic.co
@@ -613,7 +613,7 @@ webhooks:
       caBundle: Cg==
       service:
         name: elastic-webhook-server
-        namespace: elastic-system
+        namespace: bds-system
         path: /validate-kibana-k8s-elastic-co-v1beta1-kibana
     failurePolicy: Ignore
     name: elastic-kb-validation-v1beta1.k8s.elastic.co

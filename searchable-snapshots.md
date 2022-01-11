@@ -73,7 +73,7 @@ POST /_license/start_trial?acknowledge=true
 ## Recover primary shards from the snapshot (consider the snapshot as replica shards)
 
 # Mount the snapshot
-POST /_snapshot/reddot-s3-repo/demo/_mount
+POST /_snapshot/reddot-s3-repo/demo/_mount?storage=shared_cache
 {
   "index": "logstash-2021.05.20",
   "renamed_index": "logstash-2021.05.20-mounted"

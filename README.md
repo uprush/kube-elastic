@@ -25,7 +25,7 @@ Browser to Kibana UI at [kibana.purestorage.int]()
 
 Get elastic user password.
 ```
-kubectl -n elastic get secret reddot-es-elastic-user -o=jsonpath='{.data.elastic}' | base64 --decode; echo
+kubectl -n bds get secret reddot-es-elastic-user -o=jsonpath='{.data.elastic}' | base64 --decode; echo
 ```
 
 ## Visualize k8s logs using ES
