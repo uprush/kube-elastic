@@ -4,7 +4,7 @@ metadata:
   name: reddot
   namespace: bds
 spec:
-  version: 7.15.0
+  version: 7.15.1
   image: harbor.purestorage.int/reddot/elasticsearch:7.15.1
   http:
     tls:
@@ -62,7 +62,7 @@ spec:
               memory: 8Gi
               cpu: 1
   - name: data
-    count: 5
+    count: 3
     config:
       node.roles: ["data_hot", "data_warm", "ingest", "data_cold", "data_content"]
       thread_pool.snapshot.max: 4
@@ -172,7 +172,7 @@ metadata:
   name: reddot
   namespace: bds
 spec:
-  version: 7.15.0
+  version: 7.15.1
   http:
     tls:
       selfSignedCertificate:

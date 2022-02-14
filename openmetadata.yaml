@@ -1,0 +1,87 @@
+apiVersion: elasticsearch.k8s.elastic.co/v1
+kind: Elasticsearch
+metadata:
+  name: metadata
+  namespace: bds-system
+spec:
+  version: 7.15.1
+  image: harbor.purestorage.int/reddot/elasticsearch:7.15.1
+  http:
+    tls:
+      selfSignedCertificate:
+        disabled: true
+  nodeSets:
+  - name: default
+    count: 1
+    config:
+      xpack.security.enabled: false
+    volumeClaimTemplates:
+    - metadata:
+        name: elasticsearch-data
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 100Gi
+        storageClassName: px-block-r2
+    podTemplate:
+      spec:
+        securityContext:
+          fsGroup: 1000
+          runAsUser: 1000
+        imagePullSecrets:
+          - name: regcred
+        initContainers:
+          - name: add-access-keys
+            env:
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: bds-s3
+                  key: access-key
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: bds-s3
+                  key: secret-key
+            command:
+              - sh
+              - -c
+              - |
+                echo $AWS_ACCESS_KEY_ID | bin/elasticsearch-keystore add --stdin --force s3.client.default.access_key
+                echo $AWS_SECRET_ACCESS_KEY | bin/elasticsearch-keystore add --stdin --force s3.client.default.secret_key
+        containers:
+        - name: elasticsearch
+          env:
+          - name: ES_JAVA_OPTS
+            value: -Xms3g -Xmx3g
+          resources:
+            requests:
+              memory: 4Gi
+              cpu: 1
+---
+
+apiVersion: kibana.k8s.elastic.co/v1
+kind: Kibana
+metadata:
+  name: metadata
+  namespace: bds-system
+spec:
+  version: 7.15.1
+  http:
+    tls:
+      selfSignedCertificate:
+        disabled: true
+  count: 1
+  elasticsearchRef:
+    name: metadata
+  podTemplate:
+    spec:
+      containers:
+      - name: kibana
+        resources:
+          requests:
+            memory: 2Gi
+            cpu: 500m
+
