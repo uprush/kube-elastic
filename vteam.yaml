@@ -9,7 +9,7 @@ spec:
       selfSignedCertificate:
         disabled: true
   nodeSets:
-  - name: master
+  - name: default
     count: 1
     config:
     volumeClaimTemplates:
@@ -21,7 +21,7 @@ spec:
         resources:
           requests:
             storage: 200Gi
-        storageClassName: px-file
+        storageClassName: px-block-r2
     podTemplate:
       spec:
         securityContext:

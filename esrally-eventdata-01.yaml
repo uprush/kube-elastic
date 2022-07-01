@@ -1,0 +1,133 @@
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: eventdata-pvc-01
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: pure-file
+  resources:
+    requests:
+      storage: 10Gi
+
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: esrally-eventdata-01
+spec:
+  #completions: 1
+  #parallelism: 1
+  template:
+    spec:
+      containers:
+      - name: esrally
+        image: elastic/rally:2.3.1
+        env:
+        - name: ELASTICPASS
+          valueFrom:
+            secretKeyRef:
+              name: ssdemo-es-elastic-user
+              key: elastic
+        args: ['race',
+               '--pipeline=benchmark-only',
+               '--track=eventdata',
+               '--track-repository=eventdata',
+               '--challenge=elasticlogs-continuous-index-and-query',
+               '--target-hosts=http://elastic:823x9rVasjJ3562yF8cvj5VE@ssdemo-es-http.default:9200',
+               '--client-options=timeout:60,use_ssl:false,verify_certs:false,basic_auth_user:''elastic''',
+               '--track-params=/rally_param/params.json']
+        resources:
+            requests:
+              memory: 52Gi
+              cpu: 6500m
+        volumeMounts:
+        - name: trackparams-cfg-vol
+          mountPath: /rally_param
+        - name: esrally-data
+          mountPath: /rally/.rally
+        - name: rally-ini
+          mountPath: /rally/.rally/rally.ini
+          subPath: rally.ini
+      restartPolicy: Never
+      volumes:
+        - name: trackparams-cfg-vol
+          configMap:
+            name: eventdata-trackparams-cfg-01
+        - name: rally-ini
+          configMap:
+            name: eventdata-esrally-ini
+        - name: esrally-data
+          persistentVolumeClaim:
+            claimName: eventdata-pvc-01
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: eventdata-trackparams-cfg-01
+data:
+  params.json: |
+    {
+      "number_of_shards": 4,
+      "number_of_replicas": 1,
+      "query_index_prefix": "elasticlogs_q_01",
+      "p1_bulk_indexing_clients": 4,
+      "p1_bulk_size": 10000,
+      "p1_duration_secs": 300,
+      "p2_bulk_indexing_clients": 1,
+      "p2_bulk_size": 1000,
+      "p2_ops": 2,
+      "p2_duration_secs": 60,
+      "max_rolledover_indices": 10,
+      "rollover_max_size": "10gb"
+    }
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: eventdata-esrally-ini
+data:
+  rally.ini: |
+    [meta]
+    config.version = 17
+    
+    [system]
+    env.name = local
+    
+    [node]
+    root.dir = /rally/.rally/benchmarks
+    src.root.dir = /rally/.rally/benchmarks/src
+    
+    [source]
+    remote.repo.url = https://github.com/elastic/elasticsearch.git
+    elasticsearch.src.subdir = elasticsearch
+    
+    [benchmarks]
+    local.dataset.cache = /rally/.rally/benchmarks/data
+    
+    [reporting]
+    datastore.type = elasticsearch
+    datastore.host = ssdemo-es-http.default
+    datastore.port = 9200
+    datastore.secure = false
+    datastore.ssl.verification_mode = none
+    datastore.user = elastic
+    datastore.password = 823x9rVasjJ3562yF8cvj5VE
+    
+    
+    [tracks]
+    default.url = https://github.com/elastic/rally-tracks
+    eventdata.url = https://github.com/elastic/rally-eventdata-track
+    
+    [teams]
+    default.url = https://github.com/elastic/rally-teams
+    
+    [defaults]
+    preserve_benchmark_candidate = false
+    
+    [distributions]
+    release.cache = true
