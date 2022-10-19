@@ -16,7 +16,7 @@ spec:
       image: gcr.io/kaniko-project/executor:latest
       args: 
         - "--context=s3://yifeng/kaniko/build.tar.gz"
-        - "--destination=harbor.purestorage.int/reddot/elasticsearch:8.3.1"
+        - "--destination=harbor.purestorage.int/reddot/elasticsearch:8.4.2"
         - "--dockerfile=build/Dockerfile"
         - "--skip-tls-verify"
         - "--cache=true"

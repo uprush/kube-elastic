@@ -4,8 +4,8 @@ metadata:
   name: reddot
   namespace: bds
 spec:
-  version: 7.15.1
-  image: harbor.purestorage.int/reddot/elasticsearch:7.15.1
+  version: 8.4.2
+  image: harbor.purestorage.int/reddot/elasticsearch:8.4.2
   http:
     tls:
       selfSignedCertificate:
@@ -25,7 +25,7 @@ spec:
         resources:
           requests:
             storage: 100Gi
-        storageClassName: pure-block
+        storageClassName: fa-direct
     podTemplate:
       spec:
         securityContext:
@@ -66,7 +66,6 @@ spec:
     config:
       node.roles: ["data_hot", "data_warm", "ingest", "data_cold", "data_content"]
       thread_pool.snapshot.max: 4
-      xpack.searchable.snapshot.shared_cache.size: 10gb
     volumeClaimTemplates:
     - metadata:
         name: elasticsearch-data
@@ -76,7 +75,7 @@ spec:
         resources:
           requests:
             storage: 400Gi
-        storageClassName: pure-file
+        storageClassName: fa-direct
     podTemplate:
       spec:
         securityContext:
@@ -127,7 +126,7 @@ spec:
         resources:
           requests:
             storage: 100Gi
-        storageClassName: pure-file
+        storageClassName: fb-nfs3
     podTemplate:
       spec:
         securityContext:
@@ -172,7 +171,7 @@ metadata:
   name: reddot
   namespace: bds
 spec:
-  version: 7.15.1
+  version: 8.4.2
   http:
     tls:
       selfSignedCertificate:
@@ -180,6 +179,8 @@ spec:
   count: 1
   elasticsearchRef:
     name: reddot
+  config:
+    monitoring.ui.ccs.enabled: false
   podTemplate:
     spec:
       containers:
