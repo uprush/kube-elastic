@@ -1,0 +1,72 @@
+# Register a repository
+PUT _snapshot/reddot-s3-repo?pretty
+  {
+  "type": "s3",
+  "settings": {
+    "bucket": "deephub",
+    "base_path": "elastic/snapshots",
+    "endpoint": "192.168.170.11",
+    "protocol": "http",
+    "max_restore_bytes_per_sec": "1gb",
+    "max_snapshot_bytes_per_sec": "200mb"
+  }
+}
+
+# We can run a snapshot
+PUT /_snapshot/reddot-s3-repo/demo
+{
+  "indices": "elasticlogs_q_01-000001",
+  "include_global_state": false
+}
+
+
+#### Let's take a look at the Snapshots, and ILM UI
+
+
+#### Full restore form a snapshot
+POST /_snapshot/reddot-s3-repo/demo/_restore
+{
+  "indices": "elasticlogs_q_01-000001",
+  "rename_pattern": "elasticlogs_q_01-000001",
+  "rename_replacement": "elasticlogs_q_01-000001-fullrestore"
+}
+
+# This will fail until the shards are recovered
+GET /elasticlogs_q_01-000001-fullrestore/_search
+
+# Recovery is in progress
+GET /_cat/recovery/elasticlogs_q_01-000001*/?v&h=index,time,type,stage,files_percent,bytes_recovered,bytes_percent
+
+
+#### Let's take a look at FB Perf UI to confirm the snapshot/restore I/Os
+
+
+#### Searchable Sanpshots for frozen tier
+# We are not going to recover anymore the shard locally,
+# but we will be using a cache on a frozon node which can cache data.
+POST /_snapshot/reddot-s3-repo/demo/_mount?storage=shared_cache
+{
+  "index": "elasticlogs_q_01-000001",
+  "renamed_index": "elasticlogs_q_01-000001-partialmount"
+}
+
+# We can start querying
+# It's caching files in data nodes behund the scene
+GET /elasticlogs_q_01-000001-partialmount/_search
+
+# Search logs with access from Singapore
+GET /elasticlogs_q_01-000001-partialmount/_search
+{
+  "query": {
+    "match": {
+      "nginx.access.geoip.country_name": "Singapore"
+    }
+  }
+}
+
+# Shards are being started
+# We can see our shard using 0 byte on disk
+GET /_cat/shards/elasticlogs_q_01-000001*/?v&h=index,shard,prirep,state,docs,store,node
+
+
+

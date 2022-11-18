@@ -30,7 +30,7 @@ PUT _snapshot/reddot-s3-repo?pretty
   "type": "s3",
   "settings": {
     "bucket": "deephub",
-    "base_path": "elastic/ss",
+    "base_path": "elastic/snapshots",
     "endpoint": "192.168.170.11",
     "protocol": "http",
     "max_restore_bytes_per_sec": "1gb",
@@ -60,11 +60,11 @@ POST /_snapshot/reddot-s3-repo/demo/_restore
   "rename_replacement": "elasticlogs_q_01-000001-fullrestore"
 }
 
-# Recovery is in progress
-GET /_cat/recovery/elasticlogs_q_01-000001*/?v&h=index,time,type,stage,files_percent,bytes_recovered,bytes_percent
-
 # This will fail until the shards are recovered
 GET /elasticlogs_q_01-000001-fullrestore/_search
+
+# Recovery is in progress
+GET /_cat/recovery/elasticlogs_q_01-000001*/?v&h=index,time,type,stage,files_percent,bytes_recovered,bytes_percent
 
 # Until the recovery is done, we won't see any data with elasticlogs_q_01-000001-fullrestore
 GET /_cat/indices/elasticlogs_q_01-000001*/?v&h=index,health,pri,rep,docs.count,store.size&s=index
@@ -73,79 +73,8 @@ GET /_cat/indices/elasticlogs_q_01-000001*/?v&h=index,health,pri,rep,docs.count,
 DELETE /elasticlogs_q_01-000001-fullrestore
 ```
 
-## Fully mounted searchable snapshots
-Fully mounted index is the default for `hot` and `cold` tier by ILM when mounting a searchable snapshots.
-```bash
-# Seachable snapshots requires Elastic Enterprise license.
-# Start a 30 days trial license
-POST /_license/start_trial?acknowledge=true
-
-## Recover primary shards from the snapshot (consider the snapshot as replica shards)
-
-# Mount the snapshot
-POST /_snapshot/reddot-s3-repo/demo/_mount?storage=full_copy
-{
-  "index": "elasticlogs_q_01-000001",
-  "renamed_index": "elasticlogs_q_01-000001-fullmount"
-}
-
-# Shards are being started
-GET /_cat/shards/elasticlogs_q_01-000001*/?v&h=index,shard,prirep,state,docs,store,node
-
-# Recovery is in progress
-GET /_cat/recovery/elasticlogs_q_01-000001*/?v&h=index,time,type,stage,files_percent,bytes_recovered,bytes_percent
-
-# We can start querying our index while it's recovering the primary shard behind the scene
-GET /elasticlogs_q_01-000001-fullmount/_count
-
-# Search logs with access from Singapore
-GET /elasticlogs_q_01-000001-fullmount/_search
-{
-  "query": {
-    "match": {
-      "nginx.access.geoip.country_name": "Singapore"
-    }
-  }
-}
-
-# Searching in the local index may be a little faster...
-# Number of access by country
-GET /elasticlogs_q_01-000001/_search
-{
-  "size": 0,
-  "track_total_hits": true,
-  "aggs": {
-    "namespace": {
-      "terms": {
-        "field": "nginx.access.geoip.country_name"
-      }
-    }
-  }
-}
-
-# Then searching in the snapshot. But if you run again this search after some time,
-# it will be a local shard
-GET /elasticlogs_q_01-000001-fullmount/_search
-{
-  "size": 0,
-  "track_total_hits": true,
-  "aggs": {
-    "namespace": {
-      "terms": {
-        "field": "nginx.access.geoip.country_name"
-      }
-    }
-  }
-}
-
-## Search directly from the snapshot (new in 7.12)
-
-# Remove the old mounted index if exists
-DELETE elasticlogs_q_01-000001-fullmount
-```
-
-# SS for frozen tier
-Partially mounted index is the default for `hot` and `cold` tier by ILM when mounting a searchable snapshots.
+# Searchable Sanpshots for frozen tier
+Partially mounted index is the default for `frozen` tier by ILM when mounting a searchable snapshots.
 
 ```bash
 # We are not going to recover anymore the shard locally
@@ -218,6 +147,78 @@ GET /elasticlogs_q_01-000001*/_search
     }
   }
 }
+```
+
+
+# Fully mounted snapshots
+Fully mounted index is the default for `hot` and `cold` tier by ILM when mounting a snapshots.
+```bash
+# Seachable snapshots requires Elastic Enterprise license.
+# Start a 30 days trial license
+POST /_license/start_trial?acknowledge=true
+
+## Recover primary shards from the snapshot (consider the snapshot as replica shards)
+
+# Mount the snapshot
+POST /_snapshot/reddot-s3-repo/demo/_mount?storage=full_copy
+{
+  "index": "elasticlogs_q_01-000001",
+  "renamed_index": "elasticlogs_q_01-000001-fullmount"
+}
+
+# Shards are being started
+GET /_cat/shards/elasticlogs_q_01-000001*/?v&h=index,shard,prirep,state,docs,store,node
+
+# Recovery is in progress
+GET /_cat/recovery/elasticlogs_q_01-000001*/?v&h=index,time,type,stage,files_percent,bytes_recovered,bytes_percent
+
+# We can start querying our index while it's recovering the primary shard behind the scene
+GET /elasticlogs_q_01-000001-fullmount/_count
+
+# Search logs with access from Singapore
+GET /elasticlogs_q_01-000001-fullmount/_search
+{
+  "query": {
+    "match": {
+      "nginx.access.geoip.country_name": "Singapore"
+    }
+  }
+}
+
+# Searching in the local index may be a little faster...
+# Number of access by country
+GET /elasticlogs_q_01-000001/_search
+{
+  "size": 0,
+  "track_total_hits": true,
+  "aggs": {
+    "namespace": {
+      "terms": {
+        "field": "nginx.access.geoip.country_name"
+      }
+    }
+  }
+}
+
+# Then searching in the snapshot. But if you run again this search after some time,
+# it will be a local shard
+GET /elasticlogs_q_01-000001-fullmount/_search
+{
+  "size": 0,
+  "track_total_hits": true,
+  "aggs": {
+    "namespace": {
+      "terms": {
+        "field": "nginx.access.geoip.country_name"
+      }
+    }
+  }
+}
+
+## Search directly from the snapshot (new in 7.12)
+
+# Remove the old mounted index if exists
+DELETE elasticlogs_q_01-000001-fullmount
 ```
 
 ## Automate data tiering with Index Lifecycle Management

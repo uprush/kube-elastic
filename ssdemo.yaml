@@ -74,7 +74,7 @@ spec:
         resources:
           requests:
             storage: 400Gi
-        storageClassName: pure-file
+        storageClassName: fb-nfs3
     podTemplate:
       spec:
         securityContext:
@@ -125,7 +125,7 @@ spec:
         resources:
           requests:
             storage: 100Gi
-        storageClassName: pure-file
+        storageClassName: fb-nfs3
     podTemplate:
       spec:
         securityContext:

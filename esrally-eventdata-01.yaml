@@ -5,7 +5,7 @@ metadata:
 spec:
   accessModes:
     - ReadWriteMany
-  storageClassName: pure-file
+  storageClassName: fb-nfs3
   resources:
     requests:
       storage: 10Gi
@@ -34,7 +34,7 @@ spec:
                '--track=eventdata',
                '--track-repository=eventdata',
                '--challenge=elasticlogs-continuous-index-and-query',
-               '--target-hosts=http://elastic:823x9rVasjJ3562yF8cvj5VE@ssdemo-es-http.default:9200',
+               '--target-hosts=http://elastic:NT1cT28437pFni0V4PG45OUr@ssdemo-es-http.default:9200',
                '--client-options=timeout:60,use_ssl:false,verify_certs:false,basic_auth_user:''elastic''',
                '--track-params=/rally_param/params.json']
         resources:
@@ -116,7 +116,7 @@ data:
     datastore.secure = false
     datastore.ssl.verification_mode = none
     datastore.user = elastic
-    datastore.password = 823x9rVasjJ3562yF8cvj5VE
+    datastore.password = NT1cT28437pFni0V4PG45OUr
     
     
     [tracks]
