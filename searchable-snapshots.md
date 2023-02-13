@@ -3,7 +3,12 @@ Searchable Snapshots with FlashBlade S3 Demo
 [Elastic searchable snapshots](https://www.elastic.co/guide/en/elasticsearch/reference/current/searchable-snapshots.html) let you use snapshots to search infrequently accessed and read-only data in a very cost-effective fashion. The cold and frozen data tiers use searchable snapshots to reduce your storage and operating costs.
 
 Elastic searchable snapshot requires enterprise license.
+```bash
+# Start a 30 days trial license
+POST /_license/start_trial?acknowledge=true
+```
 
+# Register a FB S3 repo
 ```bash
 # List of index and shard
 GET /_cat/shards?h=index,shard,prirep,state,unassigned.reason
@@ -153,10 +158,6 @@ GET /elasticlogs_q_01-000001*/_search
 # Fully mounted snapshots
 Fully mounted index is the default for `hot` and `cold` tier by ILM when mounting a snapshots.
 ```bash
-# Seachable snapshots requires Elastic Enterprise license.
-# Start a 30 days trial license
-POST /_license/start_trial?acknowledge=true
-
 ## Recover primary shards from the snapshot (consider the snapshot as replica shards)
 
 # Mount the snapshot

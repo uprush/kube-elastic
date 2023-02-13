@@ -34,7 +34,7 @@ spec:
                '--track=eventdata',
                '--track-repository=eventdata',
                '--challenge=elasticlogs-continuous-index-and-query',
-               '--target-hosts=http://elastic:NT1cT28437pFni0V4PG45OUr@ssdemo-es-http.default:9200',
+               '--target-hosts=http://elastic:8P6p56n43GdhT0tStwh6n7e8@ssdemo-es-http.default:9200',
                '--client-options=timeout:60,use_ssl:false,verify_certs:false,basic_auth_user:''elastic''',
                '--track-params=/rally_param/params.json']
         resources:
@@ -72,7 +72,7 @@ data:
     {
       "number_of_shards": 4,
       "number_of_replicas": 1,
-      "query_index_prefix": "elasticlogs_q_01",
+      "query_index_prefix": "elasticlogs_q_02",
       "p1_bulk_indexing_clients": 4,
       "p1_bulk_size": 10000,
       "p1_duration_secs": 300,
@@ -116,7 +116,7 @@ data:
     datastore.secure = false
     datastore.ssl.verification_mode = none
     datastore.user = elastic
-    datastore.password = NT1cT28437pFni0V4PG45OUr
+    datastore.password = 8P6p56n43GdhT0tStwh6n7e8
     
     
     [tracks]

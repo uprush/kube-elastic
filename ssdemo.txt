@@ -50,7 +50,7 @@ POST /_snapshot/reddot-s3-repo/demo/_mount?storage=shared_cache
   "renamed_index": "elasticlogs_q_01-000001-partialmount"
 }
 
-# We can start querying
+# We can start searching
 # It's caching files in data nodes behund the scene
 GET /elasticlogs_q_01-000001-partialmount/_search
 
@@ -69,4 +69,36 @@ GET /elasticlogs_q_01-000001-partialmount/_search
 GET /_cat/shards/elasticlogs_q_01-000001*/?v&h=index,shard,prirep,state,docs,store,node
 
 
+# Creat an index template and assosiate it with an ILM policy
+PUT _index_template/ss_template
+{
+  "index_patterns": ["elasticlogs_q_02-*"],                 
+  "template": {
+    "settings": {
+      "index.lifecycle.name": "ss",      
+      "index.lifecycle.rollover_alias": "ss-esrally"    
+    }
+  }
+}
 
+# Bootstrap the initial time series index with a write index alias
+PUT elasticlogs_q_02-000001
+{
+  "aliases": {
+    "ss-esrally": {
+      "is_write_index": true
+    }
+  }
+}
+
+# Check lifycycle progress
+GET ss-esrally-*/_ilm/explain
+
+
+# Check ILM status
+GET elasticlogs*/_ilm/explain
+
+# Clean up
+DELETE /_snapshot/reddot-s3-repo/demo
+DELETE /elasticlogs_q_01-000001-fullrestore
+DELETE /elasticlogs_q_01-000001-partialmount
