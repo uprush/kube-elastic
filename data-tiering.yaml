@@ -1,0 +1,203 @@
+apiVersion: elasticsearch.k8s.elastic.co/v1
+kind: Elasticsearch
+metadata:
+  name: ssdemo
+spec:
+  version: 8.3.1
+  image: harbor.purestorage.int/reddot/elasticsearch:8.3.1
+  http:
+    tls:
+      selfSignedCertificate:
+        disabled: true
+  nodeSets:
+  - name: master
+    count: 1
+    config:
+      node.roles: ["master"]
+      thread_pool.snapshot.max: 4
+    volumeClaimTemplates:
+    - metadata:
+        name: elasticsearch-data
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 100Gi
+        storageClassName: px-ssd
+    podTemplate:
+      spec:
+        securityContext:
+          fsGroup: 1000
+          runAsUser: 1000
+        imagePullSecrets:
+          - name: regcred
+        containers:
+        - name: elasticsearch
+          env:
+          - name: ES_JAVA_OPTS
+            value: -Xms6g -Xmx6g
+          resources:
+            requests:
+              memory: 8Gi
+              cpu: 1
+  - name: data_hot
+    count: 3
+    config:
+      node.roles: ["data_hot","ingest"]
+      thread_pool.snapshot.max: 4
+    volumeClaimTemplates:
+    - metadata:
+        name: elasticsearch-data
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 400Gi
+        storageClassName: px-ssd
+    podTemplate:
+      spec:
+        securityContext:
+          fsGroup: 1000
+          runAsUser: 1000
+        imagePullSecrets:
+          - name: regcred
+        containers:
+        - name: elasticsearch
+          env:
+          - name: ES_JAVA_OPTS
+            value: -Xms6g -Xmx6g
+          resources:
+            requests:
+              memory: 8Gi
+              cpu: 1
+  - name: data_warm
+    count: 10
+    config:
+      node.roles: ["data_warm"]
+      thread_pool.snapshot.max: 4
+    volumeClaimTemplates:
+    - metadata:
+        name: elasticsearch-data
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 400Gi
+        storageClassName: fa-c-direct
+    podTemplate:
+      spec:
+        securityContext:
+          fsGroup: 1000
+          runAsUser: 1000
+        imagePullSecrets:
+          - name: regcred
+        containers:
+        - name: elasticsearch
+          env:
+          - name: ES_JAVA_OPTS
+            value: -Xms6g -Xmx6g
+          resources:
+            requests:
+              memory: 8Gi
+              cpu: 1
+  - name: data-frozen
+    count: 1
+    config:
+      node.roles: ["data_frozen"]
+      thread_pool.snapshot.max: 4
+      xpack.searchable.snapshot.shared_cache.size: 90gb
+    volumeClaimTemplates:
+    - metadata:
+        name: elasticsearch-data
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 100Gi
+        storageClassName: fb-nfs3
+    podTemplate:
+      spec:
+        securityContext:
+          fsGroup: 1000
+          runAsUser: 1000
+        imagePullSecrets:
+          - name: regcred
+        initContainers:
+          - name: add-access-keys
+            env:
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: yifeng-s3
+                  key: access-key
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: yifeng-s3
+                  key: secret-key
+            command:
+              - sh
+              - -c
+              - |
+                echo $AWS_ACCESS_KEY_ID | bin/elasticsearch-keystore add --stdin --force s3.client.default.access_key
+                echo $AWS_SECRET_ACCESS_KEY | bin/elasticsearch-keystore add --stdin --force s3.client.default.secret_key
+        containers:
+        - name: elasticsearch
+          env:
+          - name: ES_JAVA_OPTS
+            value: -Xms3g -Xmx3g
+          resources:
+            requests:
+              memory: 4Gi
+              cpu: 500m
+
+---
+
+apiVersion: kibana.k8s.elastic.co/v1
+kind: Kibana
+metadata:
+  name: ssdemo
+spec:
+  version: 8.3.1
+  http:
+    tls:
+      selfSignedCertificate:
+        disabled: true
+  config:
+    monitoring.ui.ccs.enabled: false
+  count: 1
+  elasticsearchRef:
+    name: ssdemo
+  podTemplate:
+    spec:
+      containers:
+      - name: kibana
+        resources:
+          requests:
+            memory: 4Gi
+            cpu: 1
+
+
+---
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: kibana
+spec:
+  rules:
+  - host: kibana-ss.purestorage.int
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: ssdemo-kb-http
+            port:
+              number: 5601
+

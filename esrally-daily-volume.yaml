@@ -1,7 +1,7 @@
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
-  name: eventdata-pvc-01
+  name: dailyvolume-pvc-01
 spec:
   accessModes:
     - ReadWriteMany
@@ -14,7 +14,7 @@ spec:
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: esrally-eventdata-01
+  name: esrally-dailyvolume
 spec:
   #completions: 1
   #parallelism: 1
@@ -33,8 +33,8 @@ spec:
                '--pipeline=benchmark-only',
                '--track=eventdata',
                '--track-repository=eventdata',
-               '--challenge=elasticlogs-continuous-index-and-query',
-               '--target-hosts=http://elastic:808K8D2CW00HntgJCzr3g75F@ssdemo-es-http.default:9200',
+               '--challenge=index-logs-fixed-daily-volume',
+               '--target-hosts=http://elastic:8P6p56n43GdhT0tStwh6n7e8@ssdemo-es-http.default:9200',
                '--client-options=timeout:60,use_ssl:false,verify_certs:false,basic_auth_user:''elastic''',
                '--track-params=/rally_param/params.json']
         resources:
@@ -53,35 +53,30 @@ spec:
       volumes:
         - name: trackparams-cfg-vol
           configMap:
-            name: eventdata-trackparams-cfg-01
+            name: dailyvolume-trackparams-cfg-01
         - name: rally-ini
           configMap:
-            name: eventdata-esrally-ini
+            name: dailyvolume-esrally-ini
         - name: esrally-data
           persistentVolumeClaim:
-            claimName: eventdata-pvc-01
+            claimName: dailyvolume-pvc-01
 
 ---
 
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: eventdata-trackparams-cfg-01
+  name: dailyvolume-trackparams-cfg-01
 data:
   params.json: |
     {
       "number_of_shards": 4,
       "number_of_replicas": 1,
-      "query_index_prefix": "elasticlogs_q_01",
-      "p1_bulk_indexing_clients": 4,
-      "p1_bulk_size": 10000,
-      "p1_duration_secs": 300,
-      "p2_bulk_indexing_clients": 1,
-      "p2_bulk_size": 1000,
-      "p2_ops": 2,
-      "p2_duration_secs": 60,
-      "max_rolledover_indices": 10,
-      "rollover_max_size": "10gb"
+      "bulk_indexing_clients": 4,
+      "daily_logging_volume": "1GB",
+      "bulk_size": 10000,
+      "starting_point": "2023-02-01:00:00:00",
+      "number_of_days": 1
     }
 
 ---
@@ -89,7 +84,7 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: eventdata-esrally-ini
+  name: dailyvolume-esrally-ini
 data:
   rally.ini: |
     [meta]
@@ -116,7 +111,7 @@ data:
     datastore.secure = false
     datastore.ssl.verification_mode = none
     datastore.user = elastic
-    datastore.password = 808K8D2CW00HntgJCzr3g75F
+    datastore.password = 8P6p56n43GdhT0tStwh6n7e8
     
     
     [tracks]

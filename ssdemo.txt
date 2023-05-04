@@ -1,3 +1,7 @@
+# Elastic searchable snapshot requires enterprise license.
+# Start a 30 days trial license
+POST /_license/start_trial?acknowledge=true
+
 # Register a repository
 PUT _snapshot/reddot-s3-repo?pretty
   {
@@ -43,7 +47,7 @@ GET /_cat/recovery/elasticlogs_q_01-000001*/?v&h=index,time,type,stage,files_per
 
 #### Searchable Sanpshots for frozen tier
 # We are not going to recover anymore the shard locally,
-# but we will be using a cache on a frozon node which can cache data.
+# but we will be using a cache on a frozen node which can cache data.
 POST /_snapshot/reddot-s3-repo/demo/_mount?storage=shared_cache
 {
   "index": "elasticlogs_q_01-000001",
@@ -51,7 +55,7 @@ POST /_snapshot/reddot-s3-repo/demo/_mount?storage=shared_cache
 }
 
 # We can start searching
-# It's caching files in data nodes behund the scene
+# It's caching files in data nodes behind the scene
 GET /elasticlogs_q_01-000001-partialmount/_search
 
 # Search logs with access from Singapore
@@ -69,36 +73,47 @@ GET /elasticlogs_q_01-000001-partialmount/_search
 GET /_cat/shards/elasticlogs_q_01-000001*/?v&h=index,shard,prirep,state,docs,store,node
 
 
+#### Additional Commands ####
+
 # Creat an index template and assosiate it with an ILM policy
-PUT _index_template/ss_template
+PUT _index_template/ss-dailyvolume_template
 {
-  "index_patterns": ["elasticlogs_q_02-*"],                 
+  "index_patterns": ["elasticlogs-2023-02-*"],                 
   "template": {
     "settings": {
       "index.lifecycle.name": "ss",      
-      "index.lifecycle.rollover_alias": "ss-esrally"    
+      "index.lifecycle.rollover_alias": "ss-dailyvolume"    
     }
   }
 }
 
 # Bootstrap the initial time series index with a write index alias
-PUT elasticlogs_q_02-000001
+PUT elasticlogs-2023-02-01-000001
 {
   "aliases": {
-    "ss-esrally": {
+    "ss-dailyvolume": {
       "is_write_index": true
     }
   }
 }
 
 # Check lifycycle progress
-GET ss-esrally-*/_ilm/explain
+GET elasticlogs-2023-02-01-*/_ilm/explain
 
+# Check SS stat
+GET /elasticlogs-2023-02-01/_searchable_snapshots/stats
 
-# Check ILM status
-GET elasticlogs*/_ilm/explain
+# Check cache stat
+GET /_searchable_snapshots/cache/stats
+
+# Clear cache
+POST /elasticlogs-2023-02-01/_searchable_snapshots/cache/clear
 
 # Clean up
 DELETE /_snapshot/reddot-s3-repo/demo
 DELETE /elasticlogs_q_01-000001-fullrestore
 DELETE /elasticlogs_q_01-000001-partialmount
+
+DELETE _index_template/ss-dailyvolume_template
+DELETE /elasticlogs-2023-02-01
+
