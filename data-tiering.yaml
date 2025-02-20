@@ -86,7 +86,7 @@ spec:
         resources:
           requests:
             storage: 400Gi
-        storageClassName: fa-c-direct
+        storageClassName: px-fa-c
     podTemplate:
       spec:
         securityContext:
